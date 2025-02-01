@@ -10,12 +10,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/spf13/viper"
 
-	"github.com/rishimalgwa/go-template/api/cache"
-	"github.com/rishimalgwa/go-template/api/db"
-	"github.com/rishimalgwa/go-template/api/migrations"
-	"github.com/rishimalgwa/go-template/api/router"
-	gofibersentry "github.com/rishimalgwa/go-template/api/sentry"
-	"github.com/rishimalgwa/go-template/api/utils"
+	"github.com/rishimalgwa/event-trigger-platform/api/cache"
+	"github.com/rishimalgwa/event-trigger-platform/api/db"
+	"github.com/rishimalgwa/event-trigger-platform/api/migrations"
+	"github.com/rishimalgwa/event-trigger-platform/api/router"
+	"github.com/rishimalgwa/event-trigger-platform/api/utils"
 )
 
 func healthCheck(c *fiber.Ctx) error {
@@ -37,11 +36,6 @@ func main() {
 
 	app.Get("/", healthCheck)
 	app.Get("/health", healthCheck)
-
-	// initialize sentry
-	gofibersentry.SentryInit()
-	sentryHandler := gofibersentry.New(gofibersentry.Options{})
-	app.Use(sentryHandler.Handle)
 
 	app.Use(logger.New(logger.Config{Next: func(c *fiber.Ctx) bool {
 		return strings.HasPrefix(c.Path(), "api")

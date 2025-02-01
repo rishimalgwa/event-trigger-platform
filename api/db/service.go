@@ -1,6 +1,6 @@
 package db
 
-import "github.com/rishimalgwa/go-template/pkg/users"
+import "github.com/rishimalgwa/event-trigger-platform/pkg/users"
 
 var (
 	UsersSvc users.Service = nil

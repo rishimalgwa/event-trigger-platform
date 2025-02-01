@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	"github.com/rishimalgwa/go-template/api/db"
-	"github.com/rishimalgwa/go-template/pkg/models"
+	"github.com/rishimalgwa/event-trigger-platform/api/db"
+	"github.com/rishimalgwa/event-trigger-platform/pkg/models"
 )
 
 func Migrate() {

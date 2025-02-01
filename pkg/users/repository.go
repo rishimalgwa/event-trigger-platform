@@ -2,7 +2,7 @@ package users
 
 import (
 	"github.com/google/uuid"
-	"github.com/rishimalgwa/go-template/pkg/models"
+	"github.com/rishimalgwa/event-trigger-platform/pkg/models"
 )
 
 type Repository interface {

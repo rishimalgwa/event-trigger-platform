@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/rishimalgwa/go-template/api/constants"
+	"github.com/rishimalgwa/event-trigger-platform/api/constants"
 	"github.com/spf13/viper"
 )
 
