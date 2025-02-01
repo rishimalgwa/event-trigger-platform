@@ -1,9 +1,13 @@
 package schemas
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type ExecuteTriggerResponse struct {
-	TriggerID  uint      `json:"trigger_id"`
+	TriggerID  uuid.UUID `json:"trigger_id"`
 	Type       string    `json:"type"`
 	Status     string    `json:"status"` // "success" or "failed"
 	ExecutedAt time.Time `json:"executed_at"`

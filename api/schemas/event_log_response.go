@@ -1,14 +1,18 @@
 package schemas
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type EventLogResponse struct {
 	Events []EventDetail `json:"events"`
 }
 
 type EventDetail struct {
-	ID         uint      `json:"id"`
-	TriggerID  uint      `json:"trigger_id"`
+	ID         uuid.UUID `json:"id"`
+	TriggerID  uuid.UUID `json:"trigger_id"`
 	Type       string    `json:"type"`
 	APIURL     *string   `json:"api_url,omitempty"`
 	APIPayload any       `json:"api_payload,omitempty"`

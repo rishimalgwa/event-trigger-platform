@@ -1,6 +1,10 @@
 package schemas
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // all active triggers
 type ListTriggersResponse struct {
@@ -8,7 +12,7 @@ type ListTriggersResponse struct {
 }
 
 type TriggerDetail struct {
-	ID        uint      `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Type      string    `json:"type"`
 	APIURL    *string   `json:"api_url,omitempty"`
 	Schedule  *string   `json:"schedule,omitempty"`
