@@ -6,6 +6,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.19.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gorm.io/driver/postgres v1.5.11
