@@ -1,14 +1,21 @@
 package db
 
-import "github.com/rishimalgwa/event-trigger-platform/pkg/users"
+import (
+	eventlog "github.com/rishimalgwa/event-trigger-platform/pkg/event-log"
+	"github.com/rishimalgwa/event-trigger-platform/pkg/trigger"
+)
 
 var (
-	UsersSvc users.Service = nil
+	TriggerSvc  trigger.Service  = nil
+	EventLogSvc eventlog.Service = nil
 )
 
 func InitServices() {
 	db := GetDB()
 
-	usersRepo := users.NewPostgresRepo(db)
-	UsersSvc = users.NewService(usersRepo)
+	triggerRepo := trigger.NewPostgresRepo(db)
+	TriggerSvc = trigger.NewService(triggerRepo)
+
+	eventLogRepo := eventlog.NewPostgresRepo(db)
+	EventLogSvc = eventlog.NewService(eventLogRepo)
 }

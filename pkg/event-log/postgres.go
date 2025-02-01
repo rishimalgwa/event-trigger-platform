@@ -1,4 +1,4 @@
-package items
+package eventlog
 
 import "gorm.io/gorm"
 

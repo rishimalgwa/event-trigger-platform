@@ -1,4 +1,4 @@
-package users
+package trigger
 
 import (
 	"github.com/google/uuid"
@@ -6,5 +6,5 @@ import (
 )
 
 type Repository interface {
-	Find(id *uuid.UUID) (*models.Users, error)
+	Find(id *uuid.UUID) (*models.Trigger, error)
 }

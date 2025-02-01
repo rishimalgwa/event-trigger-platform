@@ -1,3 +1,3 @@
-package items
+package eventlog
 
 type Repository interface{}

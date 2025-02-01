@@ -1,4 +1,4 @@
-package users
+package trigger
 
 import (
 	"github.com/google/uuid"
@@ -10,8 +10,8 @@ type repo struct {
 	DB *gorm.DB
 }
 
-func (r *repo) Find(id *uuid.UUID) (*models.Users, error) {
-	u := &models.Users{}
+func (r *repo) Find(id *uuid.UUID) (*models.Trigger, error) {
+	u := &models.Trigger{}
 	result := r.DB.Where("id = ?", id).First(u)
 	if result.Error != nil {
 		return nil, result.Error

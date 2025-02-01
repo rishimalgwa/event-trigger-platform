@@ -1,4 +1,4 @@
-package users
+package trigger
 
 import (
 	"github.com/google/uuid"
@@ -7,14 +7,14 @@ import (
 
 type Service interface{}
 
-type userSvc struct {
+type triggerSvc struct {
 	repo Repository
 }
 
 func NewService(r Repository) Service {
-	return &userSvc{repo: r}
+	return &triggerSvc{repo: r}
 }
 
-func (u *userSvc) Find(id *uuid.UUID) (*models.Users, error) {
-	return u.repo.Find(id)
+func (t *triggerSvc) Find(id *uuid.UUID) (*models.Trigger, error) {
+	return t.repo.Find(id)
 }

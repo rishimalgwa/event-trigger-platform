@@ -8,5 +8,5 @@ import (
 func Migrate() {
 	database := db.GetDB()
 	database.Raw("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
-	database.AutoMigrate(&models.Users{}, &models.Items{})
+	database.AutoMigrate(&models.Trigger{}, &models.EventLog{})
 }

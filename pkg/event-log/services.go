@@ -1,11 +1,11 @@
-package items
+package eventlog
 
 type Service interface{}
 
-type itemsSvc struct {
+type eventLogSvc struct {
 	repo Repository
 }
 
 func NewService(r Repository) Service {
-	return &itemsSvc{repo: r}
+	return &eventLogSvc{repo: r}
 }
