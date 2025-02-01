@@ -1,7 +1,7 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.20-buster@sha256:f86220e98c9d858143a68158dde675a0178854549511d9fee469767edfefc0d7 AS builder
+FROM golang:1.23-alpine AS builder
 
 # Create appuser.
 ENV USER=appuser
@@ -16,7 +16,7 @@ RUN adduser \
     --uid "${UID}" \    
     "${USER}"
 
-WORKDIR $GOPATH/ github.com/rishimalgwa/go-template
+WORKDIR $GOPATH/ github.com/rishimalgwa/event-trigger-platform
 COPY . .
 
 # # Fetch dependencies.
