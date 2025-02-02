@@ -12,6 +12,7 @@ import (
 
 	"github.com/rishimalgwa/event-trigger-platform/api/cache"
 	"github.com/rishimalgwa/event-trigger-platform/api/db"
+	"github.com/rishimalgwa/event-trigger-platform/api/kafka"
 	"github.com/rishimalgwa/event-trigger-platform/api/migrations"
 	"github.com/rishimalgwa/event-trigger-platform/api/router"
 	"github.com/rishimalgwa/event-trigger-platform/api/utils"
@@ -54,9 +55,14 @@ func main() {
 
 	// Initialize DB
 	db.InitServices()
+	// Start Kafka consumer in a separate goroutine
+	go kafka.StartTriggerConsumer(kafka.Consumer, kafka.Producer, db.TriggerSvc, db.EventLogSvc)
 
 	// Mount Routes
 	router.MountRoutes(app)
+
+	// Serve static files (HTML, CSS, JS)
+	app.Static("/", "./static")
 
 	// Get Port
 	port := utils.GetPort()

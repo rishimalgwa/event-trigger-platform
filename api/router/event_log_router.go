@@ -7,5 +7,6 @@ import (
 
 func MountEventLogRoutes(apiGroup fiber.Router) {
 	thisController := controllers.EventLogController{}
-	apiGroup.Get("/eventlog", thisController.GetEventLogs)
+	apiGroup.Get("/eventlog/active", thisController.GetActiveEventLogs)
+	apiGroup.Get("/eventlog/archived", thisController.GetArchivedEventLogs)
 }

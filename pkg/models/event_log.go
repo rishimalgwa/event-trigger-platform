@@ -22,6 +22,7 @@ type EventLog struct {
 	Status      EventStatus `gorm:"type:varchar(20);not null;check:status IN ('active', 'archived', 'deleted')"`
 	APIPayload  *string     `gorm:"type:jsonb;default:null"`
 	IsManual    bool        `gorm:"default:false"`
+	APIURL      *string     `gorm:"type:text;default:null"`
 }
 
 func (e *EventLog) BeforeCreate(tx *gorm.DB) error {

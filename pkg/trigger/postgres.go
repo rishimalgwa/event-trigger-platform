@@ -1,6 +1,8 @@
 package trigger
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/rishimalgwa/event-trigger-platform/api/schemas"
 	"github.com/rishimalgwa/event-trigger-platform/pkg/models"
@@ -11,20 +13,37 @@ type repo struct {
 	DB *gorm.DB
 }
 
+func NewPostgresRepo(db *gorm.DB) Repository {
+	return &repo{
+		DB: db,
+	}
+}
+
 // Save implements Repository.
-func (r *repo) Save(trigger *schemas.CreateTriggerRequest) error {
+func (r *repo) Save(trigger *schemas.CreateTriggerRequest) (*uuid.UUID, error) {
+	triggerID := uuid.New()
+	var schTime time.Time
+	if trigger.ScheduleTime != nil {
+		schTime, _ = time.Parse(time.RFC3339, *trigger.ScheduleTime)
+	}
 	t := &models.Trigger{
 		// UserID:              trigger.UserID,
+		BaseModel: models.BaseModel{
+			ID: triggerID,
+		},
 		Type:                models.TriggerType(trigger.Type),
-		ScheduleTime:        trigger.ScheduleTime,
+		ScheduleTime:        &schTime,
 		IntervalSecs:        trigger.IntervalSecs,
-		IsRecurring:         *trigger.IsRecurring,
+		IsRecurring:         trigger.IsRecurring,
 		APIURL:              trigger.APIURL,
 		APIPayload:          trigger.APIPayload,
 		NumberOfOccurrences: trigger.NumberOfOccurrences,
 	}
-
-	return r.DB.Save(t).Error
+	err := r.DB.Create(t).Error
+	if err != nil {
+		return nil, err
+	}
+	return &triggerID, nil
 
 }
 
@@ -40,10 +59,4 @@ func (r *repo) Find(id *uuid.UUID) (*models.Trigger, error) {
 	}
 
 	return u, nil
-}
-
-func NewPostgresRepo(db *gorm.DB) Repository {
-	return &repo{
-		DB: db,
-	}
 }

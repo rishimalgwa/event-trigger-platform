@@ -8,5 +8,5 @@ import (
 
 type Repository interface {
 	Find(id *uuid.UUID) (*models.Trigger, error)
-	Save(trigger *schemas.CreateTriggerRequest) error
+	Save(trigger *schemas.CreateTriggerRequest) (*uuid.UUID, error)
 }

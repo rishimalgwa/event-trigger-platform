@@ -34,6 +34,48 @@ services:
     volumes:
       - task_postgres_data:/var/lib/postgresql/data
       # - ./go_backend/logs:/var/lib/postgresql/data/log
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+    networks:
+      - "web.network"
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    networks:
+      - "web.network"
+
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-ui
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: "local"
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9093"
+  #     KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper:2181"
+  #   ports:
+  #     - "8081:8080"
+  #   depends_on:
+  #     - kafka
+  #   networks:
+  #     - "web.network"
   web:
     build: .
     ports:
@@ -43,9 +85,10 @@ services:
     restart: "always"
     environment:
       - Replica= {{.Task.Name}}
-      - TZ=Asia/Kolkata
+      # - TZ=Asia/Kolkata
     depends_on:
       - db
+      - kafka
     networks:
       - "web.network"
     deploy:
@@ -53,6 +96,7 @@ services:
 
 networks:
   web.network:
+    driver: bridge
 volumes:
   task_postgres_data:
   postgress-logs:
