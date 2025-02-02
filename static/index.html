@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Event Trigger Platform</title>
+        <script defer src="script.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+<body>
+
+    <h1>Event Trigger Platform</h1>
+
+    <h2>Create Trigger</h2>
+    <select id="triggerType">
+        <option value="scheduled">Scheduled</option>
+        <option value="api">API</option>
+    </select>
+    
+    <div id="scheduledFields">
+        <label>Schedule Time:</label>
+        <input type="datetime-local" id="scheduleTime">
+        <br>
+        <label>Recurring:</label>
+        <input type="checkbox" id="isRecurring">
+        <br>
+        <label>Interval (seconds):</label>
+        <input type="number" id="intervalSecs" min="10">
+        <br>
+        <label>Occurrences:</label>
+        <input type="number" id="occurrences" min="1">
+    </div>
+
+    <div id="apiFields" style="display: none;">
+        <label>API URL:</label>
+        <input type="text" id="apiUrl">
+        <br>
+        <label>API Payload:</label>
+        <textarea id="apiPayload"></textarea>
+        <label>Schedule Time:</label>
+        <input type="datetime-local" id="apiScheduleTime">
+        <br>
+    </div>
+
+    <button onclick="createTrigger()">Create Trigger</button>
+
+    <h2>Event Logs</h2>
+    <button onclick="fetchLogs('active')">Active Logs</button>
+    <button onclick="fetchLogs('archived')">Archived Logs</button>
+
+    <div id="eventLogs"></div>
+
+</body>
+</html>
