@@ -8,3 +8,5 @@ var ENV = []string{
 	"ENVIRONMENT",
 	"MIGRATE",
 }
+
+var KAFKA_SCHEDULED_TRIGGERS_TOPIC = "scheduled-triggers"

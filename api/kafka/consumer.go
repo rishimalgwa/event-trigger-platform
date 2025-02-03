@@ -7,6 +7,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
+	"github.com/rishimalgwa/event-trigger-platform/api/constants"
 	eventlog "github.com/rishimalgwa/event-trigger-platform/pkg/event-log"
 	"github.com/rishimalgwa/event-trigger-platform/pkg/models"
 	"github.com/rishimalgwa/event-trigger-platform/pkg/trigger"
@@ -14,7 +15,7 @@ import (
 
 // StartTriggerConsumer listens to the Kafka topic and executes triggers
 func StartTriggerConsumer(kafkaConsumer sarama.Consumer, kafkaProducer sarama.SyncProducer, triggerSvc trigger.Service, eventLogSvc eventlog.Service) {
-	part, err := kafkaConsumer.ConsumePartition("scheduled-triggers", 0, sarama.OffsetNewest)
+	part, err := kafkaConsumer.ConsumePartition(constants.KAFKA_SCHEDULED_TRIGGERS_TOPIC, 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error starting Kafka consumer: %v", err)
 	}
@@ -34,11 +35,55 @@ func StartTriggerConsumer(kafkaConsumer sarama.Consumer, kafkaProducer sarama.Sy
 		isRecurring, _ := event["isRecurring"].(bool)
 		intervalSecs, _ := event["intervalSecs"].(float64)
 		occurrencesLeft, _ := event["occurrencesLeft"].(float64)
+		isTest, _ := event["isTest"].(bool) // Check for the test flag
 
-		// Convert execution time to Go time format
 		execTime, _ := time.Parse(time.RFC3339, executeTime)
 
-		// Sleep until execution time
+		if isTest {
+			apiPayload, _ := event["apiPayload"].(string)
+			apiURL, _ := event["apiURL"].(string)
+			log.Printf("Test Trigger received, executing once")
+			testTriggerID := uuid.New()
+			// Sleep until execution time for scheduled triggers
+			time.Sleep(time.Until(execTime))
+			// Log before execution
+			eventLog := &models.EventLog{
+				TriggerID:   testTriggerID,
+				TriggeredAt: time.Now(),
+				Status:      models.Active,
+				APIPayload:  &apiPayload,
+				APIURL:      &apiURL,
+				IsManual:    true,
+			}
+
+			// Save event log for the test trigger
+			eventLogSvc.SaveEventLog(eventLog)
+
+			// Execute the test trigger
+
+			err = triggerSvc.ExecuteTrigger(&models.Trigger{
+				BaseModel: models.BaseModel{
+					ID: testTriggerID,
+				},
+				Type:       models.APITrigger,
+				APIURL:     &apiURL,
+				APIPayload: &apiPayload,
+			})
+			if err != nil {
+				triggerSvc.UpdateExecutionStatus(&testTriggerID, models.Failed)
+				log.Printf("Trigger execution failed: %v", err)
+				continue
+			}
+
+			// Mark as Executed for test triggers
+			triggerSvc.UpdateExecutionStatus(&testTriggerID, models.Executed)
+			println("Test Trigger executed")
+
+			// Skip the recurring logic as test triggers are not recurring
+			continue
+		}
+
+		// Sleep until execution time for regular scheduled triggers
 		time.Sleep(time.Until(execTime))
 
 		// Find the trigger from DB
@@ -77,7 +122,7 @@ func StartTriggerConsumer(kafkaConsumer sarama.Consumer, kafkaProducer sarama.Sy
 
 			msgBytes, _ := json.Marshal(event)
 			msg := &sarama.ProducerMessage{
-				Topic: "scheduled-triggers",
+				Topic: constants.KAFKA_SCHEDULED_TRIGGERS_TOPIC,
 				Value: sarama.StringEncoder(msgBytes),
 			}
 			_, _, _ = kafkaProducer.SendMessage(msg)

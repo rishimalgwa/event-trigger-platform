@@ -42,25 +42,6 @@ func (t *TriggerController) CreateTrigger(ctx *fiber.Ctx) error {
 		return views.InternalServerError(ctx, err)
 	}
 
-	// sent to queue
-
-	// // Handle different trigger types
-	// switch models.TriggerType(trigger.Type) {
-	// case models.ScheduledTrigger:
-	// 	// Send to Kafka for future execution
-	// err = db.TriggerSvc.ScheduleTrigger(trigger)
-	// if err != nil {
-	// 	return views.InternalServerError(ctx, err)
-	// }
-
-	// case models.APITrigger:
-	// 	// Execute immediately
-	// 	err := db.TriggerSvc.ExecuteTrigger(trigger)
-	// 	if err != nil {
-	// 		return views.InternalServerError(ctx, err)
-	// 	}
-	// }
-
 	return views.OK(ctx, schemas.CreateTriggerResponse{
 		ID:                  *triggerId,
 		Type:                string(payload.Type),
@@ -107,4 +88,31 @@ func (t *TriggerController) UpdateTrigger(ctx *fiber.Ctx) error {
 		return views.InternalServerError(ctx, err)
 	}
 	return views.OK(ctx, nil)
+}
+
+func (t *TriggerController) TestTrigger(ctx *fiber.Ctx) error {
+	// Parse request
+	payload := new(schemas.CreateTriggerRequest)
+	if err := ctx.BodyParser(payload); err != nil {
+		return views.InvalidJson(ctx, err)
+	}
+
+	// Validate request
+	err := payload.Validate()
+	if err != nil {
+		return views.ValidationError(ctx, err)
+	}
+
+	error := db.TriggerSvc.ProduceTestTrigger(*payload)
+	if error != nil {
+		return views.InternalServerError(ctx, error)
+	}
+
+	// Return success response
+	return views.OK(ctx, fiber.Map{
+		"message":  "Test trigger scheduled/executed successfully",
+		"type":     payload.Type,
+		"schedule": payload.ScheduleTime,
+		"api_url":  payload.APIURL,
+	})
 }

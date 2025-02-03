@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/rishimalgwa/event-trigger-platform/api/constants"
 	"github.com/rishimalgwa/event-trigger-platform/api/db"
 	"github.com/rishimalgwa/event-trigger-platform/api/kafka"
 )
@@ -38,7 +39,7 @@ func StartTriggerCron() {
 
 				msgBytes, _ := json.Marshal(triggerEvent)
 				msg := &sarama.ProducerMessage{
-					Topic: "scheduled-triggers",
+					Topic: constants.KAFKA_SCHEDULED_TRIGGERS_TOPIC,
 					Value: sarama.StringEncoder(msgBytes),
 				}
 

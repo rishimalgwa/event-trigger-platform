@@ -2,12 +2,16 @@ package trigger
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/google/uuid"
+	"github.com/rishimalgwa/event-trigger-platform/api/constants"
 	"github.com/rishimalgwa/event-trigger-platform/api/schemas"
 	"github.com/rishimalgwa/event-trigger-platform/pkg/models"
 )
@@ -22,6 +26,7 @@ type Service interface {
 	DeleteTrigger(triggerID uuid.UUID) error
 	FindScheduledTriggers(start, end time.Time) ([]*models.Trigger, error)
 	FindAll() ([]*models.Trigger, error)
+	ProduceTestTrigger(trigger schemas.CreateTriggerRequest) error
 }
 
 type triggerSvc struct {
@@ -102,4 +107,41 @@ func (t *triggerSvc) DeleteTrigger(triggerID uuid.UUID) error {
 
 	// Delete trigger from DB
 	return t.repo.Delete(&triggerID)
+}
+
+func (s *triggerSvc) ProduceTestTrigger(trigger schemas.CreateTriggerRequest) error {
+	eventTime, err := time.Parse(time.RFC3339, *trigger.ScheduleTime)
+	if err != nil {
+		return fmt.Errorf("failed to parse schedule time: %v", err)
+	}
+	triggerEvent := map[string]interface{}{
+
+		"eventTime":       eventTime,
+		"isRecurring":     trigger.IsRecurring,
+		"intervalSecs":    trigger.IntervalSecs,
+		"occurrencesLeft": trigger.NumberOfOccurrences,
+		"apiURL":          trigger.APIURL,
+		"apiPayload":      trigger.APIPayload,
+		"isTest":          true, // Mark it as a test trigger
+	}
+
+	msgBytes, err := json.Marshal(triggerEvent)
+	if err != nil {
+		return fmt.Errorf("failed to marshal trigger: %v", err)
+	}
+
+	msg := &sarama.ProducerMessage{
+		Topic: constants.KAFKA_SCHEDULED_TRIGGERS_TOPIC,
+		Value: sarama.StringEncoder(msgBytes),
+	}
+
+	// Send to Kafka
+	_, _, err = s.kafkaProd.SendMessage(msg)
+	if err != nil {
+		log.Printf("Error sending test trigger to Kafka: %v", err)
+		return err
+	}
+
+	log.Printf("Test trigger %s sent to Kafka", trigger.Type)
+	return nil
 }

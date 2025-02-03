@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Add event listener for the test button
+    document.getElementById("testButton").addEventListener("click", function() {
+        toggleTestMode();
+    });
     document.getElementById("triggersList").addEventListener('click', function(event) {
         const triggerItem = event.target.closest('.trigger-item');
         if (!triggerItem) return;
@@ -267,40 +271,52 @@ function fetchLogs(type) {
         });
 }
 
-// Create Trigger
+// Track whether the "Test" mode is on or off
+let isTestMode = false;
+
+// Toggle "Test" mode
+function toggleTestMode() {
+    isTestMode = !isTestMode;
+    document.getElementById("testButton").textContent = isTestMode ? "Test Mode: ON" : "Test Mode: OFF";
+}
+
+// Create Trigger function modified
 async function createTrigger() {
     let type = document.getElementById("triggerType").value;
     let body = { type };
-    
+
     if (type === "scheduled") {
-        if(!document.getElementById("scheduleTime").value){
+        if (!document.getElementById("scheduleTime").value) {
             alert("Please select a schedule time.");
             return;
         }
         let scheduleTimeInput = document.getElementById("scheduleTime").value;
-        body.schedule_time = scheduleTimeInput ? 
+        body.schedule_time = scheduleTimeInput ?
             new Date(scheduleTimeInput).toISOString().split('.')[0] + "Z" : null;
         body.is_recurring = document.getElementById("isRecurring").checked;
-        
+
         let interval = document.getElementById("intervalSecs").value;
         let occurrences = document.getElementById("occurrences").value;
-        
+
         if (interval) body.interval_secs = parseInt(interval);
         if (occurrences) body.number_of_occurrences = parseInt(occurrences);
     } else if (type === "api") {
-        if(!document.getElementById("apiScheduleTime").value){
+        if (!document.getElementById("apiScheduleTime").value) {
             alert("Please select a schedule time.");
             return;
         }
         let scheduleTimeInput = document.getElementById("apiScheduleTime").value;
-        body.schedule_time = scheduleTimeInput ? 
+        body.schedule_time = scheduleTimeInput ?
             new Date(scheduleTimeInput).toISOString().split('.')[0] + "Z" : null;
         body.api_url = document.getElementById("apiUrl").value;
         body.api_payload = document.getElementById("apiPayload").value;
     }
 
+    // Determine the API endpoint based on Test Mode
+    let endpoint = isTestMode ? "/api/trigger/test" : "/api/trigger/";
+
     try {
-        let res = await fetch("/api/trigger/", {
+        let res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
@@ -314,9 +330,7 @@ async function createTrigger() {
         alert("Error creating trigger!");
     }
 }
-
 // Delete Trigger
-// Update deleteTrigger to use the new approach
 function deleteTrigger(id) {
     if (!confirm("Are you sure you want to delete this trigger?")) return;
 

@@ -6,5 +6,4 @@ func MountRoutes(c *fiber.App) {
 	apiGroup := c.Group("/api")
 	MountTriggerRoutes(apiGroup)
 	MountEventLogRoutes(apiGroup)
-	MountTriggerTestRoutes(apiGroup)
 }

@@ -12,4 +12,5 @@ func MountTriggerRoutes(apiGroup fiber.Router) {
 	apiGroup.Get("/trigger/:id", thisController.GetTriggerById)
 	apiGroup.Delete("/trigger/:id", thisController.DeleteTrigger)
 	apiGroup.Put("/trigger/:id", thisController.UpdateTrigger)
+	apiGroup.Post("/trigger/test", thisController.TestTrigger)
 }
