@@ -119,6 +119,7 @@ func (s *eventLogSvc) GetArchivedLogs() ([]models.EventLog, error) {
 	for _, logStr := range logs {
 		var eventLog models.EventLog
 		json.Unmarshal([]byte(logStr), &eventLog)
+		eventLog.Status = "archived"
 		eventLogs = append(eventLogs, eventLog)
 	}
 	return eventLogs, nil
