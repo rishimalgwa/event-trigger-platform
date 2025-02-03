@@ -250,6 +250,9 @@ function fetchLogs(type) {
             logs.forEach(log => {
                 html += `
                     <div class="log-entry">
+                    ${log.IsManual ? `
+                        <p style="color: red;"><strong>Testing Trigger</strong></p>
+                    ` : ''}
                         <p><strong>Trigger ID:</strong> ${log.TriggerID}</p>
                         <p><strong>Status:</strong> ${log.Status}</p>
                         <p><strong>Triggered At:</strong> ${new Date(log.TriggeredAt).toLocaleString()}</p>
@@ -257,6 +260,7 @@ function fetchLogs(type) {
                             <p><strong>API URL:</strong> ${log.APIURL}</p>
                             <p><strong>API Payload:</strong> <pre>${JSON.stringify(JSON.parse(log.APIPayload), null, 2)}</pre></p>
                         ` : ''}
+                          
                     </div>
                 `;
             });
