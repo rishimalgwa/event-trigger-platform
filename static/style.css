@@ -12,6 +12,16 @@ h1 {
     color: #333;
 }
 
+/* Container */
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
 /* Forms */
 label {
     font-weight: bold;
@@ -33,7 +43,7 @@ button {
     color: white;
     border: none;
     padding: 10px 15px;
-    margin-top: 10px;
+    margin: 5px;
     cursor: pointer;
     border-radius: 5px;
     transition: background 0.3s ease-in-out;
@@ -43,36 +53,90 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* Event Log Section */
-#eventLogs {
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    background-color: #e9ecef;
+    color: #333;
+    margin: 0 5px;
+}
+
+.tabs button:hover {
+    background-color: #dee2e6;
+}
+
+/* Triggers List */
+.triggers-list {
     margin-top: 20px;
 }
 
-.log-entry {
-    background: white;
+.trigger-item {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
     padding: 15px;
-    margin: 10px 0;
-    border-left: 5px solid #007bff;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.log-entry strong {
+.trigger-details {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+.trigger-actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.trigger-actions button {
+    margin: 5px 0;
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+
+/* Log Tabs */
+.log-tabs {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.log-tab {
+    flex-grow: 1;
+    background-color: #e9ecef;
     color: #333;
 }
 
-/* Layout */
-.container {
-    max-width: 600px;
-    margin: auto;
-    padding: 20px;
+.log-tab.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Event Logs */
+.log-entry {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px 0;
 }
 
 /* Responsive */
 @media (max-width: 600px) {
-    .container {
-        width: 90%;
+    .trigger-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .trigger-actions {
+        flex-direction: row;
+        justify-content: space-between;
     }
 }

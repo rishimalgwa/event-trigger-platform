@@ -51,29 +51,26 @@ func StartTriggerConsumer(kafkaConsumer sarama.Consumer, kafkaProducer sarama.Sy
 
 		// Log before execution
 		eventLog := &models.EventLog{
-
 			TriggerID:   trigger.ID,
 			TriggeredAt: time.Now(),
 			Status:      models.Active,
 			APIPayload:  trigger.APIPayload,
 			APIURL:      trigger.APIURL,
 		}
-		// eventLogSvc.SaveEventLog(eventLog)
+		triggerSvc.UpdateExecutionStatus(&trigger.ID, models.Executing)
 
 		// Execute trigger
 		err = triggerSvc.ExecuteTrigger(trigger)
 		if err != nil {
-			// eventLog.Status = "failed"
-			// eventLogSvc.SaveEventLog(eventLog)
+			triggerSvc.UpdateExecutionStatus(&trigger.ID, models.Failed)
 			log.Printf("Trigger execution failed: %v", err)
 			continue
 		}
 
-		// Log success
-		// eventLog.Status = "executed"
+		// Save event log
 		eventLogSvc.SaveEventLog(eventLog)
 
-		// Handle recurring triggers
+		// Handle recurring triggers properly
 		if isRecurring && occurrencesLeft > 1 {
 			event["eventTime"] = time.Now().Add(time.Duration(intervalSecs) * time.Second).Format(time.RFC3339)
 			event["occurrencesLeft"] = occurrencesLeft - 1
@@ -84,7 +81,11 @@ func StartTriggerConsumer(kafkaConsumer sarama.Consumer, kafkaProducer sarama.Sy
 				Value: sarama.StringEncoder(msgBytes),
 			}
 			_, _, _ = kafkaProducer.SendMessage(msg)
+		} else {
+			// Only mark as Executed when it's NOT recurring or all occurrences are done
+			triggerSvc.UpdateExecutionStatus(&trigger.ID, models.Executed)
 		}
+
 		println("Trigger executed")
 	}
 }

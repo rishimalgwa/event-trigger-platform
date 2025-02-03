@@ -8,47 +8,67 @@
         <link rel="stylesheet" href="style.css">
     </head>
 <body>
+    <div class="container">
+        <h1>Event Trigger Platform</h1>
 
-    <h1>Event Trigger Platform</h1>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button onclick="showTab('createTrigger')">Create Trigger</button>
+            <button onclick="showTab('allTriggers')">All Triggers</button>
+            <button onclick="showTab('eventLogs')">Event Logs</button>
+        </div>
 
-    <h2>Create Trigger</h2>
-    <select id="triggerType">
-        <option value="scheduled">Scheduled</option>
-        <option value="api">API</option>
-    </select>
-    
-    <div id="scheduledFields">
-        <label>Schedule Time:</label>
-        <input type="datetime-local" id="scheduleTime">
-        <br>
-        <label>Recurring:</label>
-        <input type="checkbox" id="isRecurring">
-        <br>
-        <label>Interval (seconds):</label>
-        <input type="number" id="intervalSecs" min="10">
-        <br>
-        <label>Occurrences:</label>
-        <input type="number" id="occurrences" min="1">
+        <!-- Create Trigger Tab -->
+        <div id="createTrigger" class="tab-content">
+            <h2>Create Trigger</h2>
+            <select id="triggerType">
+                <option value="scheduled">Scheduled</option>
+                <option value="api">API</option>
+            </select>
+            
+            <div id="scheduledFields">
+                <label>Schedule Time:</label>
+                <input type="datetime-local" id="scheduleTime" required>
+                <br>
+                <label>Recurring:</label>
+                <input type="checkbox" id="isRecurring">
+                <br>
+                <label>Interval (seconds):</label>
+                <input type="number" id="intervalSecs" min="10">
+                <br>
+                <label>Occurrences:</label>
+                <input type="number" id="occurrences" min="1">
+            </div>
+
+            <div id="apiFields" style="display: none;">
+                <label>API URL:</label>
+                <input type="text" id="apiUrl">
+                <br>
+                <label>API Payload:</label>
+                <textarea id="apiPayload"></textarea>
+                <label>Schedule Time:</label>
+                <input type="datetime-local" id="apiScheduleTime" required>
+                <br>
+            </div>
+
+            <button onclick="createTrigger()">Create Trigger</button>
+        </div>
+
+        <!-- All Triggers Tab -->
+        <div id="allTriggers" class="tab-content" style="display: none;">
+            <h2>All Triggers</h2>
+            <div id="triggersList" class="triggers-list"></div>
+        </div>
+
+        <!-- Event Logs Tab -->
+        <div id="eventLogs" class="tab-content" style="display: none;">
+            <h2>Event Logs</h2>
+            <div class="log-tabs">
+                <button onclick="switchLogType('active')" class="log-tab active">Active Logs</button>
+                <button onclick="switchLogType('archived')" class="log-tab">Archived Logs</button>
+            </div>
+            <div id="eventLogsList"></div>
+        </div>
     </div>
-
-    <div id="apiFields" style="display: none;">
-        <label>API URL:</label>
-        <input type="text" id="apiUrl">
-        <br>
-        <label>API Payload:</label>
-        <textarea id="apiPayload"></textarea>
-        <label>Schedule Time:</label>
-        <input type="datetime-local" id="apiScheduleTime">
-        <br>
-    </div>
-
-    <button onclick="createTrigger()">Create Trigger</button>
-
-    <h2>Event Logs</h2>
-    <button onclick="fetchLogs('active')">Active Logs</button>
-    <button onclick="fetchLogs('archived')">Archived Logs</button>
-
-    <div id="eventLogs"></div>
-
 </body>
 </html>

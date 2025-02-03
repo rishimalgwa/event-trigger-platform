@@ -2,7 +2,7 @@ package trigger
 
 import (
 	"bytes"
-	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -15,8 +15,13 @@ import (
 type Service interface {
 	Find(id *uuid.UUID) (*models.Trigger, error)
 	Save(trigger *schemas.CreateTriggerRequest) (*uuid.UUID, error)
-	ScheduleTrigger(trigger *models.Trigger) error
+	UpdateExecutionStatus(id *uuid.UUID, status models.ExecutionStatus) error
+	Update(trigger *schemas.UpdateTriggerRequest, id *uuid.UUID) error
 	ExecuteTrigger(trigger *models.Trigger) error
+	UpdateTrigger(triggerID uuid.UUID, updates *schemas.UpdateTriggerRequest) error
+	DeleteTrigger(triggerID uuid.UUID) error
+	FindScheduledTriggers(start, end time.Time) ([]*models.Trigger, error)
+	FindAll() ([]*models.Trigger, error)
 }
 
 type triggerSvc struct {
@@ -26,6 +31,19 @@ type triggerSvc struct {
 
 func NewService(r Repository, kafkaProd sarama.SyncProducer) Service {
 	return &triggerSvc{repo: r, kafkaProd: kafkaProd}
+}
+
+func (t *triggerSvc) FindAll() ([]*models.Trigger, error) {
+	return t.repo.FindAll()
+}
+
+// Update implements Service.
+func (t *triggerSvc) Update(trigger *schemas.UpdateTriggerRequest, id *uuid.UUID) error {
+	return t.repo.Update(trigger, id)
+}
+
+func (t *triggerSvc) FindScheduledTriggers(start, end time.Time) ([]*models.Trigger, error) {
+	return t.repo.FindScheduledTriggers(start, end)
 }
 
 // Find implements Service.
@@ -38,35 +56,10 @@ func (t *triggerSvc) Save(trigger *schemas.CreateTriggerRequest) (*uuid.UUID, er
 	return t.repo.Save(trigger)
 }
 
-func (t *triggerSvc) ScheduleTrigger(trigger *models.Trigger) error {
-	// Determine execution time
-	var executeAt time.Time
-	if trigger.ScheduleTime != nil {
-		executeAt = *trigger.ScheduleTime
-	} else {
-		executeAt = time.Now().Add(time.Duration(*trigger.IntervalSecs) * time.Second)
-	}
-
-	// Prepare Kafka message
-	triggerEvent := map[string]interface{}{
-		"triggerID":       trigger.ID,
-		"eventTime":       executeAt.Format(time.RFC3339),
-		"isRecurring":     trigger.IsRecurring,
-		"intervalSecs":    trigger.IntervalSecs,
-		"occurrencesLeft": trigger.NumberOfOccurrences, // Track recurring execution count
-	}
-
-	msgBytes, _ := json.Marshal(triggerEvent)
-	msg := &sarama.ProducerMessage{
-		Topic: "scheduled-triggers",
-		Value: sarama.StringEncoder(msgBytes),
-	}
-
-	// Send to Kafka
-	_, _, err := t.kafkaProd.SendMessage(msg)
-	println("Message sent to Kafka")
-	return err
+func (t *triggerSvc) UpdateExecutionStatus(id *uuid.UUID, status models.ExecutionStatus) error {
+	return t.repo.UpdateExecutionStatus(id, status)
 }
+
 func (t *triggerSvc) ExecuteTrigger(trigger *models.Trigger) error {
 
 	// Handle API trigger execution
@@ -82,4 +75,31 @@ func (t *triggerSvc) ExecuteTrigger(trigger *models.Trigger) error {
 	}
 
 	return nil
+}
+func (t *triggerSvc) UpdateTrigger(triggerID uuid.UUID, updates *schemas.UpdateTriggerRequest) error {
+	trigger, err := t.repo.Find(&triggerID)
+	if err != nil {
+		return errors.New("trigger not found")
+	}
+
+	if trigger.ExecutionStatus != models.Initialized {
+		return errors.New("cannot update a trigger that is already executing or executed")
+	}
+
+	// Save updated trigger
+	return t.repo.Update(updates, &triggerID)
+}
+
+func (t *triggerSvc) DeleteTrigger(triggerID uuid.UUID) error {
+	trigger, err := t.repo.Find(&triggerID)
+	if err != nil {
+		return errors.New("trigger not found")
+	}
+
+	if trigger.ExecutionStatus != models.Initialized {
+		return errors.New("cannot delete a trigger that is already executing or executed")
+	}
+
+	// Delete trigger from DB
+	return t.repo.Delete(&triggerID)
 }

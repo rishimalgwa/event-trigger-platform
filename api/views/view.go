@@ -117,3 +117,12 @@ func TokenExpired(c *fiber.Ctx, err error) error {
 		StatusCode: status,
 	})
 }
+
+func BadRequest(c *fiber.Ctx, err error) error {
+	status := fiber.StatusBadRequest
+	return c.Status(status).JSON(ReturnMsg{
+		Msg:        "bad request",
+		Err:        fmt.Sprintf("%v", err),
+		StatusCode: status,
+	})
+}
